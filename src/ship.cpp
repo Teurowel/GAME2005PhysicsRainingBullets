@@ -11,13 +11,13 @@
 Ship::Ship() :
 	m_maxSpeed(5.0f), m_currentDirection(0.0f), m_turnSpeed(2.0f), m_steerForce(0.1f), m_currentTile(NULL)
 {
-	TheTextureManager::Instance()->load("../Assets/textures/ship3.png",
-		"ship", TheGame::Instance()->getRenderer());
+	TheTextureManager::Instance()->load("../Assets/textures/plane2.png",
+		"plane", TheGame::Instance()->getRenderer());
 
-	glm::vec2 size = TheTextureManager::Instance()->getTextureSize("ship");
+	glm::vec2 size = TheTextureManager::Instance()->getTextureSize("plane");
 	setWidth(size.x);
 	setHeight(size.y);
-	setPosition(glm::vec2(400.0f, 300.0f));
+	setPosition(glm::vec2(0, 0));
 	setVelocity(glm::vec2(0.0f, 0.0f));
 	setAcceleration(glm::vec2(0.0f, 0.0f));
 	setIsColliding(false);
@@ -34,9 +34,11 @@ void Ship::draw()
 {
 	int xComponent = getPosition().x;
 	int yComponent = getPosition().y;
+	int Width = getWidth();
+	int Height = getHeight();
 
-	TheTextureManager::Instance()->draw("ship", xComponent, yComponent,
-		TheGame::Instance()->getRenderer(), m_currentDirection, 255, true);
+	TheTextureManager::Instance()->draw("plane", xComponent - (Width * 0.5f), yComponent - (Height * 0.5f),
+		TheGame::Instance()->getRenderer(), 0.f, 255);
 }
 
 void Ship::m_checkState()

@@ -5,6 +5,8 @@
 #include <algorithm>
 #include "TileComparators.h"
 #include <iomanip>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h> 
 #include <math.h>
 
 StartScene::StartScene()
@@ -22,8 +24,13 @@ void StartScene::draw()
 	m_pInstructionsLabel->draw();*/
 
 	m_pShip->draw();	
-	m_pPlanet->draw();
-	m_pMine->draw();
+	//m_pPlanet->draw();
+	//m_pMine->draw();
+
+	for (int i = 0; i < BULLETNUM; ++i)
+	{
+		m_vecBullet[i]->draw();
+	}
 
 	// ImGui Rendering section - DO NOT MOVE OR DELETE
 	if (m_displayUI)
@@ -32,11 +39,16 @@ void StartScene::draw()
 		ImGuiSDL::Render(ImGui::GetDrawData());
 		SDL_SetRenderDrawColor(TheGame::Instance()->getRenderer(), 255, 255, 255, 255);
 
-		//Util::DrawRect(m_pShip->getPosition() - glm::vec2(m_pShip->getWidth() * 0.5f, m_pShip->getHeight() *0.5f), m_pShip->getWidth(), m_pShip->getHeight());
-		Util::DrawRect(m_pPlanet->getPosition() - glm::vec2(m_pPlanet->getWidth() * 0.5f, m_pPlanet->getHeight() *0.5f), m_pPlanet->getWidth(), m_pPlanet->getHeight());
-		Util::DrawRect(m_pMine->getPosition() - glm::vec2(m_pMine->getWidth() * 0.5f, m_pMine->getHeight() *0.5f), m_pMine->getWidth(), m_pMine->getHeight());
+		for (int i = 0; i < BULLETNUM; ++i)
+		{
+			Util::DrawRect(m_vecBullet[i]->getPosition() - glm::vec2(m_vecBullet[i]->getWidth() * 0.5f, m_vecBullet[i]->getHeight() * 0.5f), m_vecBullet[i]->getWidth(), m_vecBullet[i]->getHeight());
+		}
 
-		Util::DrawCircle(m_pShip->getPosition(), std::max(m_pShip->getWidth(), m_pShip->getHeight()) * 0.5f);
+		Util::DrawRect(m_pShip->getPosition() - glm::vec2(m_pShip->getWidth() * 0.5f, m_pShip->getHeight() *0.5f), m_pShip->getWidth(), m_pShip->getHeight());
+		//Util::DrawRect(m_pPlanet->getPosition() - glm::vec2(m_pPlanet->getWidth() * 0.5f, m_pPlanet->getHeight() *0.5f), m_pPlanet->getWidth(), m_pPlanet->getHeight());
+		//Util::DrawRect(m_pMine->getPosition() - glm::vec2(m_pMine->getWidth() * 0.5f, m_pMine->getHeight() *0.5f), m_pMine->getWidth(), m_pMine->getHeight());
+
+		//Util::DrawCircle(m_pShip->getPosition(), std::max(m_pShip->getWidth(), m_pShip->getHeight()) * 0.5f);
 		//Util::DrawCircle(m_pPlanet->getPosition(), std::max(m_pPlanet->getWidth(), m_pPlanet->getHeight()) * 0.5f);
 		//Util::DrawCircle(m_pMine->getPosition(), std::max(m_pMine->getWidth(), m_pMine->getHeight()) * 0.5f);
 	}
@@ -45,9 +57,15 @@ void StartScene::draw()
 void StartScene::update()
 {
 	m_move();
-	m_pShip->update();
-	m_pPlanet->update();
-	m_pMine->update();
+	//m_pShip->update();
+	//m_pPlanet->update();
+	//m_pMine->update();
+
+	for (int i = 0; i < BULLETNUM; ++i)
+	{
+		CollisionManager::AABBCheck(m_pShip, m_vecBullet[i]);
+		m_vecBullet[i]->update();
+	}
 
 	//CollisionManager::squaredRadiusCheck(m_pShip, m_pPlanet);
 	//CollisionManager::squaredRadiusCheck(m_pShip, m_pMine);
@@ -55,8 +73,8 @@ void StartScene::update()
 	//CollisionManager::AABBCheck(m_pShip, m_pPlanet);
 	//CollisionManager::AABBCheck(m_pShip, m_pMine);
 
-	CollisionManager::circleAABBCheck(m_pShip, m_pPlanet);
-	CollisionManager::circleAABBCheck(m_pShip, m_pMine);
+	//CollisionManager::circleAABBCheck(m_pShip, m_pPlanet);
+	//CollisionManager::circleAABBCheck(m_pShip, m_pMine);
 	
 	if (m_displayUI)
 	{
@@ -69,7 +87,13 @@ void StartScene::clean()
 	/*delete m_pStartLabel;
 	delete m_pInstructionsLabel;*/
 
-	delete m_pShip;
+	//delete m_pShip;
+
+	for (int i = 0; i < BULLETNUM; ++i)
+	{
+		delete m_vecBullet[i];
+	}
+	m_vecBullet.clear();
 
 	removeAllChildren();
 }
@@ -179,6 +203,8 @@ void StartScene::handleEvents()
 
 void StartScene::start()
 {
+	srand(time(NULL));
+
 	TheSoundManager::Instance()->load(
 		"../Assets/audio/yay.ogg", 
 		"yay", SOUND_SFX);
@@ -186,21 +212,34 @@ void StartScene::start()
 		"../Assets/audio/thunder.ogg", 
 		"thunder", SOUND_SFX);
 
-	m_position = glm::vec2(100.0f, 100.0f);
+	//m_position = glm::vec2(100.0f, 100.0f);
 	m_pShip = new Ship();
-	m_pShip->setPosition(m_position);
+	m_pShip->setPosition(glm::vec2(300.0f, 300.0f));
 	addChild(m_pShip);
 
 	m_moveState = MOVE_IDLE;
-	m_speedFactor = glm::vec2(2.0f, 2.0f);
+	//m_speedFactor = glm::vec2(2.0f, 2.0f);
+	m_fSpeed = 5.f;
 
-	// Instantiate a Planet
-	m_pPlanet = new Planet();
-	m_pPlanet->setPosition(glm::vec2(200.0f, 100.0));
-	
-	// Instantiate a Space Mine
-	m_pMine = new Mine();
-	m_pMine->setPosition(glm::vec2(200.0f, 200.0));
+	//// Instantiate a Planet
+	//m_pPlanet = new Planet();
+	//m_pPlanet->setPosition(glm::vec2(200.0f, 100.0));
+	//
+	//// Instantiate a Space Mine
+	//m_pMine = new Mine();
+	//m_pMine->setPosition(glm::vec2(200.0f, 200.0));
+
+	m_vecBullet.reserve(BULLETNUM);
+	for (int i = 0; i < BULLETNUM; ++i)
+	{
+		Bullet* pBullet = new Bullet;
+		pBullet->setPosition(glm::vec2((rand() % (Config::SCREEN_WIDTH - 20)) + 10, -10));
+		pBullet->SetSpeed((rand() % pBullet->GetSpeedRange()) + 1);
+		pBullet->setParent(this);
+
+		m_vecBullet.push_back(pBullet);
+		
+	}
 }
 
 void StartScene::m_ImGuiKeyMap()
@@ -560,6 +599,6 @@ void StartScene::m_move()
 	}
 
 	
-	m_position = m_pShip->getPosition() + m_velocity * m_speedFactor; // +m_acceleration;
+	m_position = m_pShip->getPosition() + m_velocity * m_fSpeed; // +m_acceleration;
 	m_pShip->setPosition(m_position);
 }

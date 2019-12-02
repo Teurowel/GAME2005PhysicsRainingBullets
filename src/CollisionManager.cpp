@@ -52,8 +52,8 @@ bool CollisionManager::squaredRadiusCheck(GameObject * object1, GameObject * obj
 
 bool CollisionManager::AABBCheck(GameObject * object1, GameObject * object2)
 {
-	glm::vec2 P1 = object1->getPosition();
-	glm::vec2 P2 = object2->getPosition();
+	glm::vec2 P1 = object1->getPosition() - glm::vec2(object1->getWidth() * 0.5f, object1->getHeight() * 0.5f);
+	glm::vec2 P2 = object2->getPosition() - glm::vec2(object2->getWidth() * 0.5f, object2->getHeight() * 0.5f);
 	float P1width = object1->getWidth();
 	float P1height = object1->getHeight();
 	float P2width = object2->getWidth();
@@ -68,7 +68,8 @@ bool CollisionManager::AABBCheck(GameObject * object1, GameObject * object2)
 		P1.y + P1height > P2.y
 		)
 	{
-		if (!object2->getIsColliding()) {
+		if (!object2->getIsColliding()) 
+		{
 
 			object2->setIsColliding(true);
 
@@ -79,6 +80,9 @@ bool CollisionManager::AABBCheck(GameObject * object1, GameObject * object2)
 				break;
 			case MINE:
 				std::cout << "Collision with Mine!" << std::endl;
+				TheSoundManager::Instance()->playSound("thunder", 0);
+				break;
+			case BULLET:
 				TheSoundManager::Instance()->playSound("thunder", 0);
 				break;
 			default:

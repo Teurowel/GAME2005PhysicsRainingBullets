@@ -8,8 +8,12 @@
 #include "MoveState.h"
 #include "Planet.h"
 #include "Mine.h"
+#include "Bullet.h"
 #include "CollisionManager.h"
 #include "SoundManager.h"
+#include <vector>
+
+#define BULLETNUM 10
 
 class StartScene : public Scene
 {
@@ -24,6 +28,8 @@ public:
 	virtual void handleEvents() override;
 	virtual void start() override;
 
+	int GetPPM() const { return m_PPM; }
+
 private:
 	/*Label* m_pStartLabel;
 	Label* m_pInstructionsLabel;*/
@@ -31,13 +37,17 @@ private:
 	// Ship Stuff
 	Ship* m_pShip;
 	MoveState m_moveState;
-	glm::vec2 m_speedFactor;
+	//glm::vec2 m_speedFactor;
+	float m_fSpeed;
 
 	// Planet Stuff
 	Planet* m_pPlanet;
 
 	// Mine Stuff
 	Mine* m_pMine;
+
+	//BUllet Stuff
+	std::vector<Bullet*> m_vecBullet;
 
 	glm::vec2 m_mousePosition;
 
